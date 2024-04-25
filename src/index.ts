@@ -22,7 +22,7 @@ const getInputs = (): Input => {
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
   result.pdfFileName = getInput("pdf-file-name");
-  result.createPdfArtifact = getBooleanInput("create-artifact");
+  result.createPdfArtifact = getBooleanInput("create-pdf-artifact");
   return result;
 }
 
