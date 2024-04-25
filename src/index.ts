@@ -39,19 +39,16 @@ export const jobSummaryFilePath = async (): Promise<string> => {
 const run = async (): Promise<void> => {
   // const input = getInputs();
   const filePath = await jobSummaryFilePath();
-  console.log(`Job summary file path: ${filePath}`)
-  // turn file path into parts
   const pathObj = path.parse(filePath);
-  console.log(`Job summary file path object: ${JSON.stringify(pathObj)}`)
   const dir = pathObj.dir;
   console.log(`Job summary file directory: ${dir}`);
   const files = readdirSync(dir);
   for (const file of files) {
     console.log(`Found file: ${file}`);
     const fileObj = path.parse(file);
-    if ( fileObj.base.startsWith('step_summary_') ) {
+    if (fileObj.base.startsWith('step_summary_') ) {
       console.log(`Found step summary: ${file}`);
-      const stepSummary = readFileSync(file, 'utf8');
+      const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
       console.log(`Step summary: ${stepSummary}`);
     }
   }
