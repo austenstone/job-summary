@@ -53,7 +53,7 @@ const mdToPdf = async (jobSummary: string, pdfFileName: string, mdFileName: stri
 const renderer = {
     code(code, infostring) {
         if (infostring === 'mermaid'){
-            return \`<pre class="mermaid">\$\{code\}</pre>\`
+            return \`<pre class="mermaid">$\{code}</pre>\`
         }
         return false
     },
