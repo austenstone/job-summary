@@ -14,12 +14,6 @@ import { access, constants } from "fs/promises";
 //   return result;
 // }
 
-const run = async (): Promise<void> => {
-  // const input = getInputs();
-  console.log(`Job summary file path: ${await jobSummaryFilePath()}`)
-};
-
-run();
 
 const SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY'
 export const jobSummaryFilePath = async (): Promise<string> => {
@@ -40,3 +34,10 @@ export const jobSummaryFilePath = async (): Promise<string> => {
 
   return pathFromEnv
 }
+
+const run = async (): Promise<void> => {
+  // const input = getInputs();
+  console.log(`Job summary file path: ${await jobSummaryFilePath()}`)
+};
+
+run();
