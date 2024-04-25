@@ -3,6 +3,8 @@ import { execSync } from "child_process";
 import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { access, constants } from "fs/promises";
 import path from "path";
+import { DefaultArtifactClient } from "@actions/artifact";
+
 // interface Input {
 //   token: string;
 // }
@@ -82,11 +84,11 @@ const run = async (): Promise<void> => {
   execSync(`md-to-pdf --config-file ./config.js ./README.md`)
   console.log('PDF generated successfully');
 
-  readdirSync('.').forEach(file => {
-    if (file.endsWith('.pdf')) {
-      console.log(`PDF file: ${file}`);
-    }
-  });
+  const artifact = new DefaultArtifactClient()
+  if (process.env.GITHUB_ACTIONS) {
+    await artifact.uploadArtifact('pdf', ['README.pdf'], '.')
+  }
+
 };
 
 run();
