@@ -3,7 +3,7 @@
 Save job summaries as PDFs.
 
 #### Usage
-Call the action and it will save the job summary as a PDF called README.pdf
+Call the action and it will save the job summary as a PDF called job-summary.pdf
 
 ```yml
       - uses: austenstone/job-summary-to-pdf@main
