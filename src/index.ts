@@ -1,23 +1,9 @@
-// import { getInput, info } from "@actions/core";
+import { info } from "@actions/core";
 import { execSync } from "child_process";
 import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { access, constants } from "fs/promises";
 import path from "path";
 import { DefaultArtifactClient } from "@actions/artifact";
-
-// interface Input {
-//   token: string;
-// }
-
-// const getInputs = (): Input => {
-//   const result = {} as Input;
-//   result.token = getInput("github-token");
-//   if (!result.token || result.token === "") {
-//     throw new Error("github-token is required");
-//   }
-//   return result;
-// }
-
 
 const SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY'
 export const jobSummaryFilePath = async (): Promise<string> => {
@@ -45,17 +31,17 @@ const run = async (): Promise<void> => {
   const filePath = await jobSummaryFilePath();
   const pathObj = path.parse(filePath);
   const dir = pathObj.dir;
-  console.log(`Job summary file directory: ${dir}`);
+  info(`Job summary file directory: ${dir}`);
   const files = readdirSync(dir);
   for (const file of files) {
     const fileObj = path.parse(file);
     if (fileObj.base.startsWith('step_summary_') ) {
-      console.log(`Found step summary: ${file}`);
+      info(`Found step summary: ${file}`);
       const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
       jobSummary += stepSummary;
     }
   }
-  console.log(`Job summary: ${jobSummary}`);
+  info(`Job summary: ${jobSummary}`);
 
   writeFileSync('README.md', jobSummary);
   writeFileSync('config.js', `// A marked renderer for mermaid diagrams
@@ -82,13 +68,12 @@ const run = async (): Promise<void> => {
 
   execSync(`npm i -g md-to-pdf`);
   execSync(`md-to-pdf --config-file ./config.js ./README.md`)
-  console.log('PDF generated successfully');
+  info('PDF generated successfully');
 
   const artifact = new DefaultArtifactClient()
   if (process.env.GITHUB_ACTIONS) {
     await artifact.uploadArtifact('pdf', ['README.pdf'], '.')
   }
-
 };
 
 run();
