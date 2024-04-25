@@ -1,5 +1,4 @@
 // import { getInput, info } from "@actions/core";
-// import { getOctokit } from "@actions/github";
 import { readFileSync } from "fs";
 import { access, constants } from "fs/promises";
 // interface Input {
@@ -41,8 +40,7 @@ const run = async (): Promise<void> => {
   const filePath = await jobSummaryFilePath();
   console.log(`Job summary file path: ${filePath}`)
   const jobSummary = readFileSync(filePath, 'utf8');
-  // write job summary file 
-  console.log(jobSummary);
+  console.log(`Job summary: ${jobSummary}`);
 };
 
 run();
