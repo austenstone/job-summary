@@ -1,5 +1,5 @@
 // import { getInput, info } from "@actions/core";
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import { access, constants } from "fs/promises";
 // interface Input {
 //   token: string;
@@ -41,6 +41,9 @@ const run = async (): Promise<void> => {
   console.log(`Job summary file path: ${filePath}`)
   const jobSummary = readFileSync(filePath, 'utf8');
   console.log(`Job summary: ${jobSummary}`);
+  // list files in directory
+  const files = readdirSync(`/home/runner/work/_temp/_runner_file_commands`);
+  console.log(`Files in directory: ${files}`)
 };
 
 run();
