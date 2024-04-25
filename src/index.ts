@@ -7,8 +7,8 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 
 interface Input {
-  createPdf: boolean;
   name: string;
+  createPdf: boolean;
   createPdfArtifact: boolean;
   createMd: boolean;
   createMdArtifact: boolean;
@@ -16,8 +16,8 @@ interface Input {
 
 const getInputs = (): Input => {
   const result = {} as Input;
-  result.createMd = getBooleanInput("create-md");
   result.name = getInput("name");
+  result.createMd = getBooleanInput("create-md");
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
   result.createPdfArtifact = getBooleanInput("create-pdf-artifact");
