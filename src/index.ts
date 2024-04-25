@@ -42,6 +42,7 @@ const run = async (): Promise<void> => {
   console.log(`Job summary file path: ${filePath}`)
   // turn file path into parts
   const pathObj = path.parse(filePath);
+  console.log(`Job summary file path object: ${JSON.stringify(pathObj)}`)
   const dir = pathObj.base;
   console.log(`Job summary file directory: ${dir}`);
   const files = readdirSync(dir);
