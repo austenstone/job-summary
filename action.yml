@@ -1,14 +1,30 @@
-name: TypeScript Action
+name: job-summary-to-pdf
 author: Austen Stone
-description: A TypeScript Action
+description: Save job summaries as a PDF files
 branding:
-  icon: "plus"
+  icon: "save"
   color: "blue"
 
 inputs:
-  github-token:
-    description: The GitHub token used to create an authenticated client
-    default: ${{ github.token }}
+  pdf-name:
+    description: The name of the PDF file
+    default: README
+    required: false
+  md-name:
+    description: The name of the markdown file
+    default: README
+    required: false
+  create-artifact:
+    description: Whether to create an artifact with the PDF file
+    default: true
+    required: false
+  create-pdf:
+    description: Whether to create a PDF file
+    default: true
+    required: false
+  create-md:
+    description: Whether to create a markdown file
+    default: true
     required: false
 
 runs:
