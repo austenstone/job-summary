@@ -27,7 +27,6 @@ export const jobSummaryFilePath = async (): Promise<string> => {
 
 const run = async (): Promise<void> => {
   let jobSummary = '';
-  // const input = getInputs();
   const filePath = await jobSummaryFilePath();
   const pathObj = path.parse(filePath);
   const dir = pathObj.dir;
