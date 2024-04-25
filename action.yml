@@ -16,7 +16,7 @@ inputs:
     required: false
   create-pdf-artifact:
     description: Whether to create an artifact with the PDF file
-    default: false
+    default: true
     required: false
   create-md:
     description: Whether to create a markdown file
