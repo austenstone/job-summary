@@ -6,26 +6,38 @@ branding:
   color: "blue"
 
 inputs:
-  pdf-name:
-    description: The name of the PDF file
-    default: README
-    required: false
-  md-name:
-    description: The name of the markdown file
-    default: README
-    required: false
-  create-artifact:
-    description: Whether to create an artifact with the PDF file
-    default: true
-    required: false
   create-pdf:
     description: Whether to create a PDF file
     default: true
+    required: false
+  pdf-file-name:
+    description: The name of the PDF file
+    default: README
+    required: false
+  create-pdf-artifact:
+    description: Whether to create an artifact with the PDF file
+    default: false
     required: false
   create-md:
     description: Whether to create a markdown file
     default: true
     required: false
+  md-file-name:
+    description: The name of the markdown file
+    default: README
+    required: false
+  create-md-artifact:
+    description: Whether to create an artifact with the markdown file
+    default: false
+    required: false
+
+outputs:
+  job-summary:
+    description: The job summary
+  pdf-file:
+    description: The path to the PDF file
+  md-file:
+    description: The path to the markdown file
 
 runs:
   using: "node20"

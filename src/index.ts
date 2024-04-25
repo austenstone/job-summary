@@ -118,6 +118,9 @@ const run = async (): Promise<void> => {
   }
 
   if (!input.createMd) unlinkSync(input.mdFileName);
+
+  setOutput('pdf-file', path.resolve(input.pdfFileName));
+  setOutput('md-file', path.resolve(input.mdFileName));
 };
 
 run();

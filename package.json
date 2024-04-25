@@ -1,8 +1,7 @@
 {
-  "name": "action-typescript",
+  "name": "job-summary-to-pdf",
   "version": "1.0.0",
-  "description": "GitHub Actions TypeScript template",
-  "private": true,
+  "description": "Converts a job summary to a PDF",
   "scripts": {
     "build": "webpack",
     "test": "jest",
