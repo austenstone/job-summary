@@ -14,11 +14,11 @@ Various inputs are defined in [`action.yml`](action.yml):
 
 | Name | Description | Default | Required |
 | --- | - | - | - |
-| pdf-name | The name of the PDF file. | README | false |
-| md-name | The name of the markdown file. | README | false |
-| create-artifact | If the PDF will be saved as an artifact. | true | false |
+| name | The name of the Md and PDF file. | README | false |
+| create-pdf-artifact | If the PDF will be saved as an artifact. | true | false |
 | create-pdf | Whether to create a PDF file. | true | false |
 | create-md | Whether to create a markdown file. | true | false |
+| create-md-artifact | If the markdown will be saved as an artifact. | true | false |
 
 ## ⬅️ Outputs
 | Name | Description |

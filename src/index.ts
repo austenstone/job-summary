@@ -8,20 +8,18 @@ import { debug } from "console";
 
 interface Input {
   createPdf: boolean;
-  pdfFileName: string;
+  name: string;
   createPdfArtifact: boolean;
   createMd: boolean;
-  mdFileName: string;
   createMdArtifact: boolean;
 }
 
 const getInputs = (): Input => {
   const result = {} as Input;
   result.createMd = getBooleanInput("create-md");
-  result.mdFileName = getInput("md-file-name");
+  result.name = getInput("name");
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
-  result.pdfFileName = getInput("pdf-file-name");
   result.createPdfArtifact = getBooleanInput("create-pdf-artifact");
   return result;
 }
@@ -46,7 +44,7 @@ export const jobSummaryFilePath = async (): Promise<string> => {
   return pathFromEnv
 }
 
-const mdToPdf = async (jobSummary: string, pdfFileName: string, mdFileName: string) => {
+const mdToPdf = async (jobSummary: string, name: string) => {
   const configFileName = '_config.js';
   // https://gist.github.com/danishcake/d045c867594d6be175cb394995c90e2c#file-readme-md
   const config = `// A marked renderer for mermaid diagrams
@@ -71,9 +69,9 @@ module.exports = {
     ]
 };`;
   execSync(`npm i -g md-to-pdf`);
-  writeFileSync(`${mdFileName}.md`, jobSummary);
+  writeFileSync(`${name}.md`, jobSummary);
   writeFileSync(configFileName, config);
-  execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFileName}.md > ./${pdfFileName}.pdf`);
+  execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md`);
   info('PDF generated successfully');
   unlinkSync(configFileName);
 }
@@ -100,27 +98,27 @@ const run = async (): Promise<void> => {
   setOutput('job-summary', jobSummary);
 
   if (input.createMd) {
-    writeFileSync(input.mdFileName, jobSummary);
+    writeFileSync(`${input.name}.md`, jobSummary);
   }
 
   if (input.createPdf) {
-    mdToPdf(jobSummary, input.pdfFileName, input.pdfFileName);
+    mdToPdf(jobSummary, input.name);
   }
 
   if (input.createPdfArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('pdf', [input.pdfFileName], '.')
+    await artifact.uploadArtifact('pdf', [`${input.name}.pdf`], '.')
   }
 
   if (input.createMdArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('md', [input.mdFileName], '.')
+    await artifact.uploadArtifact('md', [`${input.name}.md`], '.')
   }
 
-  if (!input.createMd) unlinkSync(input.mdFileName);
+  if (!input.createMd) unlinkSync(`${input.name}.md`);
 
-  setOutput('pdf-file', path.resolve(input.pdfFileName));
-  setOutput('md-file', path.resolve(input.mdFileName));
+  setOutput('pdf-file', path.resolve(`${input.name}.pdf`));
+  setOutput('md-file', path.resolve(`${input.name}.md`));
 };
 
 run();
