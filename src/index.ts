@@ -1,6 +1,7 @@
 // import { getInput, info } from "@actions/core";
 import { readFileSync, readdirSync } from "fs";
 import { access, constants } from "fs/promises";
+import path from "path";
 // interface Input {
 //   token: string;
 // }
@@ -39,6 +40,9 @@ const run = async (): Promise<void> => {
   // const input = getInputs();
   const filePath = await jobSummaryFilePath();
   console.log(`Job summary file path: ${filePath}`)
+  // turn file path into parts
+  const parts = path.parse(filePath);
+  console.log(`File path parts: ${JSON.stringify(parts)}`)
   const jobSummary = readFileSync(filePath, 'utf8');
   console.log(`Job summary: ${jobSummary}`);
   // list files in directory
