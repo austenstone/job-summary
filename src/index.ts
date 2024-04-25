@@ -37,6 +37,7 @@ export const jobSummaryFilePath = async (): Promise<string> => {
 }
 
 const run = async (): Promise<void> => {
+  let jobSummary = '';
   // const input = getInputs();
   const filePath = await jobSummaryFilePath();
   const pathObj = path.parse(filePath);
@@ -44,14 +45,14 @@ const run = async (): Promise<void> => {
   console.log(`Job summary file directory: ${dir}`);
   const files = readdirSync(dir);
   for (const file of files) {
-    console.log(`Found file: ${file}`);
     const fileObj = path.parse(file);
     if (fileObj.base.startsWith('step_summary_') ) {
       console.log(`Found step summary: ${file}`);
       const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
-      console.log(`Step summary: ${stepSummary}`);
+      jobSummary += stepSummary;
     }
   }
+  console.log(`Job summary: ${jobSummary}`);
 
 };
 
