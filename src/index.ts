@@ -109,12 +109,12 @@ const run = async (): Promise<void> => {
 
   if (input.createPdfArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('pdf', ['README.pdf'], '.')
+    await artifact.uploadArtifact('pdf', [input.pdfFileName], '.')
   }
 
   if (input.createMdArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('md', ['README.md'], '.')
+    await artifact.uploadArtifact('md', [input.mdFileName], '.')
   }
 
   if (!input.createMd) unlinkSync(input.mdFileName);
