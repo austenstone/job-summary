@@ -34,7 +34,7 @@ const run = async (): Promise<void> => {
   const files = readdirSync(dir);
   for (const file of files) {
     const fileObj = path.parse(file);
-    if (fileObj.base.startsWith('step_summary_') ) {
+    if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
       info(`Found step summary: ${file}`);
       const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
       jobSummary += stepSummary;
