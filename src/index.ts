@@ -43,8 +43,10 @@ const run = async (): Promise<void> => {
   // turn file path into parts
   const pathObj = path.parse(filePath);
   const dir = pathObj.base;
+  console.log(`Job summary file directory: ${dir}`);
   const files = readdirSync(dir);
   for (const file of files) {
+    console.log(`Found file: ${file}`);
     const fileObj = path.parse(file);
     if ( fileObj.base.startsWith('step_summary_') ) {
       console.log(`Found step summary: ${file}`);
