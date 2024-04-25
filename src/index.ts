@@ -41,13 +41,18 @@ const run = async (): Promise<void> => {
   const filePath = await jobSummaryFilePath();
   console.log(`Job summary file path: ${filePath}`)
   // turn file path into parts
-  const parts = path.parse(filePath);
-  console.log(`File path parts: ${JSON.stringify(parts)}`)
-  const jobSummary = readFileSync(filePath, 'utf8');
-  console.log(`Job summary: ${jobSummary}`);
-  // list files in directory
-  const files = readdirSync(`/home/runner/work/_temp/_runner_file_commands`);
-  console.log(`Files in directory: ${files}`)
+  const pathObj = path.parse(filePath);
+  const dir = pathObj.base;
+  const files = readdirSync(dir);
+  for (const file of files) {
+    const fileObj = path.parse(file);
+    if ( fileObj.base.startsWith('step_summary_') ) {
+      console.log(`Found step summary: ${file}`);
+      const stepSummary = readFileSync(file, 'utf8');
+      console.log(`Step summary: ${stepSummary}`);
+    }
+  }
+
 };
 
 run();
