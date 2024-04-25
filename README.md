@@ -2,6 +2,9 @@
 
 Save job summaries as PDFs.
 
+> [!TIP]
+> Try combining this with notification actions such as [send-email](https://github.com/marketplace/actions/send-email), [slack](https://github.com/marketplace/actions/slack-send), [teams](https://github.com/marketplace/actions/microsoft-teams-notification), [discord](https://github.com/marketplace/actions/discord-message-notify), etc.
+
 #### Usage
 Call the action and it will save the job summary as a PDF called job-summary.pdf
 
