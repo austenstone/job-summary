@@ -1,0 +1,30 @@
+name: Usage
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await core.summary
+              .addHeading('Test Results')
+              .addTable([
+                [{data: 'File', header: true}, {data: 'Result', header: true}],
+                ['foo.js', 'Pass ✅'],
+                ['bar.js', 'Fail ❌'],
+                ['test.js', 'Pass ✅']
+              ])
+              .addLink('View staging deployment!', 'https://github.com')
+              .write()
+      - uses: austenstone/job-id@v1
+        id: job-id
+      - run: curl -s -H "Authorization: Bearer $GITHUB_TOKEN" https://github.com/${{ github.repository }}/actions/runs/$GITHUB_RUN_ID/jobs/$GITHUB_JOB_ID/summary_raw
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_JOB_ID: ${{ steps.job-id.outputs.job-id }}
