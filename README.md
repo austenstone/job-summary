@@ -12,6 +12,16 @@ Call the action and it will save the job summary as a PDF called job-summary.pdf
       - uses: austenstone/job-summary-to-pdf@main
 ```
 
+#### Usage to get only markdown summary
+
+```yml
+      - uses: austenstone/job-summary-to-pdf@main
+        id: job-summary
+        with:
+          create-pdf: false
+      - run: echo "${{ steps.job-summary.outputs.job-summary }}"
+```
+
 ## ➡️ Inputs
 Various inputs are defined in [`action.yml`](action.yml):
 
