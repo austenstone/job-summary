@@ -28,8 +28,8 @@ Various inputs are defined in [`action.yml`](action.yml):
 | Name | Description | Default | Required |
 | --- | - | - | - |
 | name | The name of the Md and PDF file. | README | false |
-| create-pdf-artifact | If the PDF will be saved as an artifact. | true | false |
 | create-pdf | Whether to create a PDF file. | true | false |
+| create-pdf-artifact | If the PDF will be saved as an artifact. | true | false |
 | create-md | Whether to create a markdown file. | true | false |
 | create-md-artifact | If the markdown will be saved as an artifact. | true | false |
 

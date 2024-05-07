@@ -115,6 +115,10 @@ const run = async (): Promise<void> => {
     await artifact.uploadArtifact('md', [`${input.name}.md`], '.')
   }
 
+  const runId = process.env.GITHUB_RUN_ID;
+  const jobId = process.env.GITHUB_JOB;
+  console.log(`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${runId}/jobs/${jobId}/summary_raw`)
+
   if (!input.createMd) unlinkSync(`${input.name}.md`);
 
   setOutput('pdf-file', path.resolve(`${input.name}.pdf`));
