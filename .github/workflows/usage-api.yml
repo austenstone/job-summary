@@ -24,6 +24,10 @@ jobs:
               .write()
       - uses: austenstone/job-id@v1
         id: job-id
+      - run: 'echo "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs/${GITHUB_JOB_ID}/summary_raw"'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_JOB_ID: ${{ steps.job-id.outputs.job-id }}
       - run: 'curl -s -H "Authorization: Bearer $GITHUB_TOKEN" https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs/${GITHUB_JOB_ID}/summary_raw'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
