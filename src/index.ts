@@ -86,6 +86,7 @@ const run = async (): Promise<void> => {
 
   debug(`Job summary file directory: ${dir}`);
   const JobSummaryFiles = readdirSync(dir);
+  debug(`Job files: ${JobSummaryFiles}`);
   for (const file of JobSummaryFiles) {
     const fileObj = path.parse(file);
     if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
