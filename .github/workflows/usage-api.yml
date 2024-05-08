@@ -22,7 +22,9 @@ jobs:
               ])
               .addLink('View staging deployment!', 'https://github.com')
               .write()
-      - uses: austenstone/job-id@v1
+      - run: |
+          run_url=$(gh run list --limit 1 --json url --jq '.[0].url')
+      - uses: austenstone/job-id@main
         id: job-id
       - run: 'echo "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs/${GITHUB_JOB_ID}/summary_raw"'
         env:
