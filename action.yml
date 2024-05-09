@@ -1,6 +1,6 @@
-name: job-summary
+name: Get Job Summary
 author: Austen Stone
-description: Get a GitHub Actions job summary and/or convert it to another format
+description: Get a GitHub Actions job summary and/or convert it to another format (PDF, markdown, or HTML)
 branding:
   icon: "save"
   color: "blue"
