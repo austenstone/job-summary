@@ -23,3 +23,7 @@ jobs:
               .addLink('View staging deployment!', 'https://github.com')
               .write()
       - uses: ./
+        with:
+          create-pdf-artifact: true
+          create-md-artifact: true
+          create-html-artifact: true
