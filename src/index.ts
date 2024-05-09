@@ -73,6 +73,8 @@ module.exports = {
   writeFileSync(configFileName, config);
   execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md`);
   info('PDF generated successfully');
+  execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md --as-html`);
+  info('HTML generated successfully');
   unlinkSync(configFileName);
 }
 
