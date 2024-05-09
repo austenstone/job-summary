@@ -1,6 +1,6 @@
-name: job-summary-to-pdf
+name: job-summary
 author: Austen Stone
-description: Save job summaries as a PDF files
+description: Get a GitHub Actions job summary and/or convert it to another format
 branding:
   icon: "save"
   color: "blue"
