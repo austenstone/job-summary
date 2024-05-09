@@ -26,14 +26,26 @@ inputs:
     description: Whether to create an artifact with the markdown file
     default: false
     required: false
+  create-html:
+    description: Whether to create an HTML file
+    default: true
+    required: false
+  create-html-artifact:
+    description: Whether to create an artifact with the HTML file
+    default: false
+    required: false
 
 outputs:
   job-summary:
     description: The job summary
+  job-summary-html:
+    description: The job summary as HTML
   pdf-file:
     description: The path to the PDF file
   md-file:
     description: The path to the markdown file
+  html-file:
+    description: The path to the HTML file
 
 runs:
   using: "node20"

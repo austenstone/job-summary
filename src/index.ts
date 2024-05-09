@@ -12,6 +12,8 @@ interface Input {
   createPdfArtifact: boolean;
   createMd: boolean;
   createMdArtifact: boolean;
+  createHtml: boolean;
+  createHtmlArtifact: boolean;
 }
 
 const getInputs = (): Input => {
@@ -21,6 +23,8 @@ const getInputs = (): Input => {
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
   result.createPdfArtifact = getBooleanInput("create-pdf-artifact");
+  result.createHtml = getBooleanInput("create-html");
+  result.createHtmlArtifact = getBooleanInput("create-html-artifact");
   return result;
 }
 
@@ -103,10 +107,9 @@ const run = async (): Promise<void> => {
   if (input.createMd) {
     writeFileSync(`${input.name}.md`, jobSummary);
   }
-
-  if (input.createPdf) {
-    mdToPdf(jobSummary, input.name);
-  }
+  
+  mdToPdf(jobSummary, input.name);
+  setOutput('job-summary-html', readFileSync(`${input.name}.html`, 'utf8'));
 
   if (input.createPdfArtifact) {
     const artifact = new DefaultArtifactClient()
@@ -118,14 +121,18 @@ const run = async (): Promise<void> => {
     await artifact.uploadArtifact('md', [`${input.name}.md`], '.')
   }
 
-  const runId = process.env.GITHUB_RUN_ID;
-  const jobId = process.env.GITHUB_JOB;
-  console.log(`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${runId}/jobs/${jobId}/summary_raw`)
+  if (input.createHtmlArtifact) {
+    const artifact = new DefaultArtifactClient()
+    await artifact.uploadArtifact('html', [`${input.name}.html`], '.')
+  }
 
   if (!input.createMd) unlinkSync(`${input.name}.md`);
+  if (!input.createPdf) unlinkSync(`${input.name}.pdf`);
+  if (!input.createHtml) unlinkSync(`${input.name}.html`);
 
   setOutput('pdf-file', path.resolve(`${input.name}.pdf`));
   setOutput('md-file', path.resolve(`${input.name}.md`));
+  setOutput('html-file', path.resolve(`${input.name}.html`));
 };
 
 run();
