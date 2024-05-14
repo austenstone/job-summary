@@ -22,14 +22,14 @@ Call the action and it will save the job summary as a PDF called job-summary.pdf
       - run: echo "${{ steps.job-summary.outputs.job-summary }}"
 ```
 
-#### Just get the Job Summary from URL
+<!-- #### Just get the Job Summary from URL
 ```yml
       - uses: austenstone/job-id@v1
         id: job-id
       - run: curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://github.com/${{ github.repository }}/actions/runs/$GITHUB_RUN_ID/jobs/$GITHUB_JOB_ID/summary_raw
         env:
           GITHUB_JOB_ID: ${{ steps.job-id.outputs.job-id }}
-```
+``` -->
 
 ## ➡️ Inputs
 Various inputs are defined in [`action.yml`](action.yml):
