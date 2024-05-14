@@ -9,13 +9,13 @@ Save job summaries as PDFs.
 Call the action and it will save the job summary as a PDF called job-summary.pdf
 
 ```yml
-      - uses: austenstone/job-summary@main
+      - uses: austenstone/job-summary@v2.0
 ```
 
 #### Usage to get only markdown summary
 
 ```yml
-      - uses: austenstone/job-summary@main
+      - uses: austenstone/job-summary@v2.0
         id: job-summary
         with:
           create-pdf: false
