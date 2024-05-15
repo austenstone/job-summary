@@ -24,6 +24,6 @@ jobs:
               .write()
       - uses: ./
         with:
-          create-pdf-artifact: true
-          create-md-artifact: true
-          create-html-artifact: true
+          name: copilot-usage
+          create-pdf-artifact: false
+          create-md-artifact: false
