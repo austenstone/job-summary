@@ -22,7 +22,7 @@ jobs:
               ])
               .addLink('View staging deployment!', 'https://github.com')
               .write()
-      - uses: ./
+      - uses: austenstone/job-summary@main
         id: usage
         with:
           name: job-summary
