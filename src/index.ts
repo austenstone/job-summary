@@ -104,14 +104,14 @@ module.exports = {
     ]
 };`;
   execSync(`npm i -g md-to-pdf`);
-  writeFileSync(`${name}.md`, jobSummary);
+  writeFileSync(mdFile, jobSummary);
   writeFileSync(configFileName, config);
-  execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md`);
+  execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile}`);
   info('PDF generated successfully');
-  execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md --as-html`);
+  execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} --as-html`);
   info('HTML generated successfully');
   unlinkSync(configFileName);
-  
+
   setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
 
   if (input.createPdfArtifact) {
