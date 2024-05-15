@@ -77,7 +77,7 @@ const run = async (): Promise<void> => {
   setOutput('job-summary', jobSummary);
 
   if (input.createMd) {
-    writeFileSync(mdFile, jobSummary);
+    writeFileSync(`./${mdFile}`, jobSummary);
   }
   
   const configFileName = '_config.js';
@@ -104,7 +104,6 @@ module.exports = {
     ]
 };`;
   execSync(`npm i -g md-to-pdf`);
-  writeFileSync(mdFile, jobSummary);
   writeFileSync(configFileName, config);
   execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile}`);
   info('PDF generated successfully');
