@@ -23,7 +23,10 @@ jobs:
               .addLink('View staging deployment!', 'https://github.com')
               .write()
       - uses: ./
+        id: usage
         with:
-          name: copilot-usage
+          name: job-summary
           create-pdf-artifact: false
           create-md-artifact: false
+      - run: echo "${{ steps.usage.outputs.job-summary }}"
+      - run: cat "${{ steps.usage.outputs.pdf-file }}"

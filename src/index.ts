@@ -1,4 +1,4 @@
-import { getBooleanInput, getInput, info, setOutput } from "@actions/core";
+import { endGroup, getBooleanInput, getInput, info, setOutput, startGroup } from "@actions/core";
 import { execSync } from "child_process";
 import { readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
 import { access, constants } from "fs/promises";
@@ -48,7 +48,38 @@ export const jobSummaryFilePath = async (): Promise<string> => {
   return pathFromEnv
 }
 
-const mdToPdf = async (jobSummary: string, name: string) => {
+const run = async (): Promise<void> => {
+  let jobSummary = '';
+
+  const filePath = await jobSummaryFilePath();
+  const input = getInputs();
+  const filePathObj = path.parse(filePath);
+  const dir = filePathObj.dir;
+  const mdFile = `${input.name}.md`
+  const pdfFile = `${input.name}.pdf`
+  const htmlFile = `${input.name}.html`
+
+  debug(`Job summary file directory: ${dir}`);
+  const JobSummaryFiles = readdirSync(dir);
+  debug(`Job files: ${JobSummaryFiles}`);
+  for (const file of JobSummaryFiles) {
+    const fileObj = path.parse(file);
+    if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
+      debug(`Found step summary: ${file}`);
+      const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
+      jobSummary += stepSummary;
+    }
+  }
+
+  startGroup('Job Summary');
+  info(jobSummary);
+  endGroup();
+  setOutput('job-summary', jobSummary);
+
+  if (input.createMd) {
+    writeFileSync(mdFile, jobSummary);
+  }
+  
   const configFileName = '_config.js';
   // https://gist.github.com/danishcake/d045c867594d6be175cb394995c90e2c#file-readme-md
   const config = `// A marked renderer for mermaid diagrams
@@ -80,59 +111,31 @@ module.exports = {
   execSync(`md-to-pdf --config-file ./${configFileName} ./${name}.md --as-html`);
   info('HTML generated successfully');
   unlinkSync(configFileName);
-}
-
-const run = async (): Promise<void> => {
-  let jobSummary = '';
-
-  const filePath = await jobSummaryFilePath();
-  const input = getInputs();
-  const filePathObj = path.parse(filePath);
-  const dir = filePathObj.dir;
-
-  debug(`Job summary file directory: ${dir}`);
-  const JobSummaryFiles = readdirSync(dir);
-  debug(`Job files: ${JobSummaryFiles}`);
-  for (const file of JobSummaryFiles) {
-    const fileObj = path.parse(file);
-    if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
-      debug(`Found step summary: ${file}`);
-      const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
-      jobSummary += stepSummary;
-    }
-  }
-  info(`Job summary: ${jobSummary}`);
-  setOutput('job-summary', jobSummary);
-
-  if (input.createMd) {
-    writeFileSync(`${input.name}.md`, jobSummary);
-  }
   
-  mdToPdf(jobSummary, input.name);
-  setOutput('job-summary-html', readFileSync(`${input.name}.html`, 'utf8'));
+  setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
 
   if (input.createPdfArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('pdf', [`${input.name}.pdf`], '.')
+    await artifact.uploadArtifact('pdf', [pdfFile], '.')
   }
 
   if (input.createMdArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('md', [`${input.name}.md`], '.')
+    await artifact.uploadArtifact('md', [mdFile], '.')
   }
 
   if (input.createHtmlArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('html', [`${input.name}.html`], '.')
+    await artifact.uploadArtifact('html', [htmlFile], '.')
   }
 
-  if (!input.createMd) unlinkSync(`${input.name}.md`);
-  if (!input.createPdf) unlinkSync(`${input.name}.pdf`);
-  if (!input.createHtml) unlinkSync(`${input.name}.html`);
+  if (!input.createMd) unlinkSync(pdfFile);
+  if (!input.createPdf) unlinkSync(pdfFile);
+  if (!input.createHtml) unlinkSync(htmlFile);
 
-  setOutput('pdf-file', path.resolve(`${input.name}.pdf`));
-  setOutput('md-file', path.resolve(`${input.name}.md`));
-  setOutput('html-file', path.resolve(`${input.name}.html`));
+  setOutput('pdf-file', path.resolve(pdfFile));
+  setOutput('md-file', path.resolve(mdFile));
+  setOutput('html-file', path.resolve(htmlFile));
 };
 
 run();
