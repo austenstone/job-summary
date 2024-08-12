@@ -1,6 +1,6 @@
-# Action
+# Job Summary Action
 
-Get & Save job summaries as PDF, HTML, or Md.
+Get and convert job summaries to Md, PDF, and HTML.
 
 > [!TIP]
 > Try combining this with notification actions such as [send-email](https://github.com/marketplace/actions/send-email), [slack](https://github.com/marketplace/actions/slack-send), [teams](https://github.com/marketplace/actions/microsoft-teams-notification), [discord](https://github.com/marketplace/actions/discord-message-notify), etc.
