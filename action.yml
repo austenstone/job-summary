@@ -34,6 +34,10 @@ inputs:
     description: Whether to create an artifact with the HTML file
     default: false
     required: false
+  artifact-name:
+    description: The name of the artifact
+    default:
+    required: false
 
 outputs:
   job-summary:

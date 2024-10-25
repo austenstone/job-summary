@@ -14,6 +14,7 @@ interface Input {
   createMdArtifact: boolean;
   createHtml: boolean;
   createHtmlArtifact: boolean;
+  artifactName: string;
 }
 
 const getInputs = (): Input => {
@@ -25,6 +26,7 @@ const getInputs = (): Input => {
   result.createPdfArtifact = getBooleanInput("create-pdf-artifact");
   result.createHtml = getBooleanInput("create-html");
   result.createHtmlArtifact = getBooleanInput("create-html-artifact");
+  result.artifactName = getInput("artifact-name") || '';
   return result;
 }
 
@@ -115,17 +117,17 @@ module.exports = {
 
   if (input.createPdfArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('pdf', [pdfFile], '.')
+    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-pdf' : 'pdf', [pdfFile], '.')
   }
 
   if (input.createMdArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('md', [mdFile], '.')
+    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-md' : 'md', [mdFile], '.')
   }
 
   if (input.createHtmlArtifact) {
     const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact('html', [htmlFile], '.')
+    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-html' : 'html', [htmlFile], '.')
   }
 
   if (!input.createMd) unlinkSync(pdfFile);

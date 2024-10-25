@@ -1,6 +1,6 @@
 {
   "name": "job-summary",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Get a GitHub Actions job summary and/or convert it to another format",
   "scripts": {
     "build": "ncc build src/index.ts -o dist --source-map --license LICENSE",
