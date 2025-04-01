@@ -6,6 +6,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
+import { execSync } from "child_process";
 
 interface Input {
   name: string;
@@ -20,7 +21,7 @@ interface Input {
 
 const getInputs = (): Input => {
   const result = {} as Input;
-  result.name = getInput("name") || 'job-summary'; // Ensure we always have a default name
+  result.name = getInput("name");
   result.createMd = getBooleanInput("create-md");
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
@@ -29,7 +30,6 @@ const getInputs = (): Input => {
   result.createHtmlArtifact = getBooleanInput("create-html-artifact");
   result.artifactName = getInput("artifact-name") || '';
 
-  // Validate inputs
   if (result.createMdArtifact && !result.createMd) {
     warning("create-md-artifact is set to true but create-md is false. Setting create-md to true.");
     result.createMd = true;
@@ -60,17 +60,13 @@ const SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY'
 export const jobSummaryFilePath = async (): Promise<string> => {
   const pathFromEnv = process.env[SUMMARY_ENV_VAR]
   if (!pathFromEnv) {
-    throw new Error(
-      `Unable to find environment variable for $${SUMMARY_ENV_VAR}. Check if your runtime environment supports job summaries.`
-    )
+    throw new Error(`Unable to find environment variable for $${SUMMARY_ENV_VAR}. Check if your runtime environment supports job summaries.`)
   }
 
   try {
     await access(pathFromEnv, constants.R_OK | constants.W_OK)
   } catch {
-    throw new Error(
-      `Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`
-    )
+    throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`)
   }
 
   return pathFromEnv
@@ -97,9 +93,9 @@ const run = async (): Promise<void> => {
     try {
       const JobSummaryFiles = readdirSync(dir);
       debug(`Job files: ${JobSummaryFiles}`);
-      
+
       let foundSummaryFiles = false;
-      
+
       for (const file of JobSummaryFiles) {
         const fileObj = path.parse(file);
         if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
@@ -109,7 +105,7 @@ const run = async (): Promise<void> => {
           jobSummary += stepSummary;
         }
       }
-      
+
       if (!foundSummaryFiles) {
         warning('No summary files found. Output may be empty.');
       }
@@ -123,7 +119,6 @@ const run = async (): Promise<void> => {
     endGroup();
     setOutput('job-summary', jobSummary);
 
-    // Configure renderers and options
     const renderer = {
       code(code, infostring) {
         if (infostring === 'mermaid') {
@@ -132,8 +127,7 @@ const run = async (): Promise<void> => {
         return false;
       },
     };
-    
-    // Common configuration for both HTML and PDF
+
     const commonConfig = {
       launch_options: { args: ["--no-sandbox"] },
       marked_extensions: [{ renderer }],
@@ -142,24 +136,21 @@ const run = async (): Promise<void> => {
         { content: 'mermaid.initialize({ startOnLoad: false}); (async () => { await mermaid.run(); })();' }
       ]
     };
-    
     const htmlConfig: Partial<HtmlConfig> = {
       ...commonConfig,
       dest: `./${htmlFile}`,
       as_html: true,
     };
-    
     const pdfConfig: Partial<PdfConfig> = {
       ...commonConfig,
       dest: `./${pdfFile}`,
     };
 
-    // Process markdown output
     if (input.createMd) {
       try {
         writeFileSync(`./${mdFile}`, jobSummary);
         info(`Markdown file created: ${mdFile}`);
-        
+
         if (input.createMdArtifact) {
           const artifact = new DefaultArtifactClient();
           const artifactName = input.artifactName ? input.artifactName + '-md' : 'md';
@@ -171,7 +162,16 @@ const run = async (): Promise<void> => {
       }
     }
 
-    // Process HTML output
+    if (input.createHtml || input.createPdf) {
+      try {
+        execSync(`npx puppeteer browsers install chrome`)
+        info('Puppeteer browsers installed successfully.');
+      } catch (err) {
+        error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     if (input.createHtml) {
       try {
         const result = await mdToPdf({ content: jobSummary }, htmlConfig);
@@ -179,7 +179,7 @@ const run = async (): Promise<void> => {
         if (result.filename) {
           info(`HTML generated successfully: ${result.filename}`);
           setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
-          
+
           if (input.createHtmlArtifact) {
             const artifact = new DefaultArtifactClient();
             const artifactName = input.artifactName ? input.artifactName + '-html' : 'html';
@@ -192,14 +192,13 @@ const run = async (): Promise<void> => {
       }
     }
 
-    // Process PDF output
     if (input.createPdf) {
       try {
         const result = await mdToPdf({ content: jobSummary }, pdfConfig);
 
         if (result.filename) {
           info(`PDF generated successfully: ${result.filename}`);
-          
+
           if (input.createPdfArtifact) {
             const artifact = new DefaultArtifactClient();
             const artifactName = input.artifactName ? input.artifactName + '-pdf' : 'pdf';
