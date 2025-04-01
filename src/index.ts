@@ -162,16 +162,16 @@ const run = async (): Promise<void> => {
       }
     }
 
-    if (input.createHtml || input.createPdf) {
-      info(`Installing Puppeteer browsers...`);
-      try {
-        execSync(`npx puppeteer browsers install chrome`)
-      } catch (err) {
-        error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
-        debug(`Puppeteer installation error: ${err}`);
-        throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
+    // if (input.createHtml || input.createPdf) {
+    //   info(`Installing Puppeteer browsers...`);
+    //   try {
+    //     execSync(`npx puppeteer browsers install chrome`)
+    //   } catch (err) {
+    //     error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
+    //     debug(`Puppeteer installation error: ${err}`);
+    //     throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
+    //   }
+    // }
 
     if (input.createHtml) {
       try {
