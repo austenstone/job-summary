@@ -138,6 +138,8 @@ const run = async (): Promise<void> => {
     debug(`Files in specific directory: ${specificFiles}`);
     // print files in this directory /home/runner/work/_actions/austenstone/job-summary/node_modules
 
+    const css = ``;
+    writeFileSync(path.join(__dirname, '..', 'markdown.css'), css);
 
     // Configure common settings with explicit executable path options
     const commonConfig = {
