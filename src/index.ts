@@ -1,10 +1,11 @@
-import { endGroup, getBooleanInput, getInput, info, setOutput, startGroup } from "@actions/core";
-import { execSync } from "child_process";
-import { readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
+import { endGroup, getBooleanInput, getInput, info, warning, error, setOutput, startGroup } from "@actions/core";
+import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { access, constants } from "fs/promises";
 import path from "path";
 import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
+import { mdToPdf } from 'md-to-pdf';
+import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
 
 interface Input {
   name: string;
@@ -19,7 +20,7 @@ interface Input {
 
 const getInputs = (): Input => {
   const result = {} as Input;
-  result.name = getInput("name");
+  result.name = getInput("name") || 'job-summary'; // Ensure we always have a default name
   result.createMd = getBooleanInput("create-md");
   result.createMdArtifact = getBooleanInput("create-md-artifact");
   result.createPdf = getBooleanInput("create-pdf");
@@ -27,6 +28,31 @@ const getInputs = (): Input => {
   result.createHtml = getBooleanInput("create-html");
   result.createHtmlArtifact = getBooleanInput("create-html-artifact");
   result.artifactName = getInput("artifact-name") || '';
+
+  // Validate inputs
+  if (result.createMdArtifact && !result.createMd) {
+    warning("create-md-artifact is set to true but create-md is false. Setting create-md to true.");
+    result.createMd = true;
+  }
+
+  if (result.createPdfArtifact && !result.createPdf) {
+    warning("create-pdf-artifact is set to true but create-pdf is false. Setting create-pdf to true.");
+    result.createPdf = true;
+  }
+
+  if (result.createHtmlArtifact && !result.createHtml) {
+    warning("create-html-artifact is set to true but create-html is false. Setting create-html to true.");
+    result.createHtml = true;
+  }
+
+  // Validate the filename doesn't contain invalid characters
+  const invalidChars = /[\\/:"*?<>|]/g;
+  if (invalidChars.test(result.name)) {
+    const safeName = result.name.replace(invalidChars, '_');
+    warning(`Invalid characters in filename '${result.name}'. Using '${safeName}' instead.`);
+    result.name = safeName;
+  }
+
   return result;
 }
 
@@ -51,94 +77,153 @@ export const jobSummaryFilePath = async (): Promise<string> => {
 }
 
 const run = async (): Promise<void> => {
-  let jobSummary = '';
-
-  const filePath = await jobSummaryFilePath();
-  const input = getInputs();
-  const filePathObj = path.parse(filePath);
-  const dir = filePathObj.dir;
-  const mdFile = `${input.name}.md`
-  const pdfFile = `${input.name}.pdf`
-  const htmlFile = `${input.name}.html`
-
-  debug(`Job summary file directory: ${dir}`);
-  const JobSummaryFiles = readdirSync(dir);
-  debug(`Job files: ${JobSummaryFiles}`);
-  for (const file of JobSummaryFiles) {
-    const fileObj = path.parse(file);
-    if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
-      debug(`Found step summary: ${file}`);
-      const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
-      jobSummary += stepSummary;
+  try {
+    let jobSummary = '';
+    let filePath: string;
+    try {
+      filePath = await jobSummaryFilePath();
+    } catch (error) {
+      throw new Error(`Failed to get job summary file path: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
 
-  startGroup('Job Summary');
-  info(jobSummary);
-  endGroup();
-  setOutput('job-summary', jobSummary);
+    const input = getInputs();
+    const filePathObj = path.parse(filePath);
+    const dir = filePathObj.dir;
+    const mdFile = `${input.name}.md`;
+    const pdfFile = `${input.name}.pdf`;
+    const htmlFile = `${input.name}.html`;
 
-  
-  const configFileName = '_config.js';
-  // https://gist.github.com/danishcake/d045c867594d6be175cb394995c90e2c#file-readme-md
-  const config = `// A marked renderer for mermaid diagrams
-const renderer = {
-    code(code, infostring) {
-        if (infostring === 'mermaid'){
-            return \`<pre class="mermaid">$\{code}</pre>\`
+    debug(`Job summary file directory: ${dir}`);
+    try {
+      const JobSummaryFiles = readdirSync(dir);
+      debug(`Job files: ${JobSummaryFiles}`);
+      
+      let foundSummaryFiles = false;
+      
+      for (const file of JobSummaryFiles) {
+        const fileObj = path.parse(file);
+        if (fileObj.base.startsWith('step_summary_') && fileObj.base.endsWith('-scrubbed')) {
+          debug(`Found step summary: ${file}`);
+          foundSummaryFiles = true;
+          const stepSummary = readFileSync(`${dir}/${file}`, 'utf8');
+          jobSummary += stepSummary;
         }
-        return false
-    },
-};
+      }
+      
+      if (!foundSummaryFiles) {
+        warning('No summary files found. Output may be empty.');
+      }
+    } catch (err) {
+      error(`Failed to read summary files: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`Failed to read summary files: ${err instanceof Error ? err.message : String(err)}`);
+    }
 
-module.exports = {
-    marked_extensions: [{ renderer }],
-    script: [
-        { url: 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js' },  
-        // Alternative to above: if you have no Internet access, you can also embed a local copy
-        // { content: require('fs').readFileSync('./node_modules/mermaid/dist/mermaid.js', 'utf-8') }
-        // For some reason, mermaid initialize doesn't render diagrams as it should. It's like it's missing
-        // the document.ready callback. Instead we can explicitly render the diagrams
+    startGroup('Job Summary');
+    info(jobSummary || 'No job summary content found.');
+    endGroup();
+    setOutput('job-summary', jobSummary);
+
+    // Configure renderers and options
+    const renderer = {
+      code(code, infostring) {
+        if (infostring === 'mermaid') {
+          return `<pre class="mermaid">${code}</pre>`;
+        }
+        return false;
+      },
+    };
+    
+    // Common configuration for both HTML and PDF
+    const commonConfig = {
+      launch_options: { args: ["--no-sandbox"] },
+      marked_extensions: [{ renderer }],
+      script: [
+        { url: 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js' },
         { content: 'mermaid.initialize({ startOnLoad: false}); (async () => { await mermaid.run(); })();' }
-    ]
-};`;
-  const launchOptions = ' --launch-options \'{ "args": ["--no-sandbox"] }\'';
-  execSync(`npm i -g md-to-pdf`);
-  writeFileSync(configFileName, config);
+      ]
+    };
+    
+    const htmlConfig: Partial<HtmlConfig> = {
+      ...commonConfig,
+      dest: `./${htmlFile}`,
+      as_html: true,
+    };
+    
+    const pdfConfig: Partial<PdfConfig> = {
+      ...commonConfig,
+      dest: `./${pdfFile}`,
+    };
 
-  if (input.createMd) {
-    writeFileSync(`./${mdFile}`, jobSummary);
-    if (input.createMdArtifact) {
-      const artifact = new DefaultArtifactClient()
-      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-md' : 'md', [mdFile], '.')
+    // Process markdown output
+    if (input.createMd) {
+      try {
+        writeFileSync(`./${mdFile}`, jobSummary);
+        info(`Markdown file created: ${mdFile}`);
+        
+        if (input.createMdArtifact) {
+          const artifact = new DefaultArtifactClient();
+          const artifactName = input.artifactName ? input.artifactName + '-md' : 'md';
+          await artifact.uploadArtifact(artifactName, [mdFile], '.');
+          info(`Markdown artifact created: ${artifactName}`);
+        }
+      } catch (err) {
+        error(`Failed to create Markdown file: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
-  }
-  
-  if (input.createHtml) {
-    execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} --as-html ${launchOptions}`);
-    info('HTML generated successfully');
-    setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
-    if (input.createHtmlArtifact) {
-      const artifact = new DefaultArtifactClient()
-      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-html' : 'html', [htmlFile], '.')
+
+    // Process HTML output
+    if (input.createHtml) {
+      try {
+        const result = await mdToPdf({ content: jobSummary }, htmlConfig);
+
+        if (result.filename) {
+          info(`HTML generated successfully: ${result.filename}`);
+          setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
+          
+          if (input.createHtmlArtifact) {
+            const artifact = new DefaultArtifactClient();
+            const artifactName = input.artifactName ? input.artifactName + '-html' : 'html';
+            await artifact.uploadArtifact(artifactName, [htmlFile], '.');
+            info(`HTML artifact created: ${artifactName}`);
+          }
+        }
+      } catch (err) {
+        error(`Failed to generate HTML: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
-  }
 
-  if (input.createPdf) {
-    execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} ${launchOptions}`);
-    info('PDF generated successfully');
-    setOutput('job-summary-pdf', readFileSync(pdfFile, 'utf8'));
-    if (input.createPdfArtifact) {
-      const artifact = new DefaultArtifactClient()
-      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-pdf' : 'pdf', [pdfFile], '.')
+    // Process PDF output
+    if (input.createPdf) {
+      try {
+        const result = await mdToPdf({ content: jobSummary }, pdfConfig);
+
+        if (result.filename) {
+          info(`PDF generated successfully: ${result.filename}`);
+          
+          if (input.createPdfArtifact) {
+            const artifact = new DefaultArtifactClient();
+            const artifactName = input.artifactName ? input.artifactName + '-pdf' : 'pdf';
+            await artifact.uploadArtifact(artifactName, [pdfFile], '.');
+            info(`PDF artifact created: ${artifactName}`);
+          }
+        }
+      } catch (err) {
+        error(`Failed to generate PDF: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
+
+    setOutput('pdf-file', path.resolve(pdfFile));
+    setOutput('md-file', path.resolve(mdFile));
+    setOutput('html-file', path.resolve(htmlFile));
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    error(`Error in job summary processing: ${errorMsg}`);
+    throw error;
   }
-
-  setOutput('pdf-file', path.resolve(pdfFile));
-  setOutput('md-file', path.resolve(mdFile));
-  setOutput('html-file', path.resolve(htmlFile));
-
-  unlinkSync(configFileName);
 };
 
-run();
+run().catch(err => {
+  const errorMsg = err instanceof Error ? err.message : String(err);
+  error(`Fatal error: ${errorMsg}`);
+  process.exit(1);
+});
