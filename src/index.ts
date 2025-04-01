@@ -6,7 +6,6 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
-import { execSync } from "child_process";
 
 interface Input {
   name: string;
@@ -128,174 +127,13 @@ const run = async (): Promise<void> => {
       },
     };
 
-    // print current working directory and files in it
-    debug(`Current working directory: ${process.cwd()}`);
-    try {
-      const files = readdirSync(process.cwd());
-      debug(`Files in current directory: ${files}`);
-    } catch (err) {
-      error(`Failed to read current directory: ${err instanceof Error ? err.message : String(err)}`);
-    }
-    // env
-    debug(`Environment variables: ${JSON.stringify(process.env)}`);
-    // print the current node version
-    debug(`Node version: ${process.versions.node}`);
-
-    // Install Chrome if needed for PDF/HTML generation
-    if (input.createHtml || input.createPdf) {
-      info('Configuring Chrome for PDF/HTML generation...');
-      
-      try {
-        // Try to download and install Chrome in the GitHub Actions environment
-        execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
-        info('Chrome installation completed');
-      } catch (err) {
-        warning(`Chrome installation warning: ${err instanceof Error ? err.message : String(err)}`);
-        info('Continuing with bundled Chromium...');
-      }
-    }
-    // create the css file needed for the pdf generation
-    const css = `
-* {
-	box-sizing: border-box;
-}
-
-html {
-	font-size: 100%;
-}
-
-body {
-	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
-		'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-	line-height: 1.6;
-	font-size: 0.6875em; /* 11 pt */
-	color: #111;
-	margin: 0;
-}
-
-body > :first-child {
-	padding-top: 0;
-	margin-top: 0;
-}
-
-body > :last-child {
-	margin-bottom: 0;
-	padding-bottom: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0;
-	padding: 0.5em 0 0.25em;
-}
-
-h5,
-h6 {
-	padding: 0;
-}
-
-h5 {
-	font-size: 1em;
-}
-
-h6 {
-	font-size: 0.875em;
-	text-transform: uppercase;
-}
-
-p {
-	margin: 0.25em 0 1em;
-}
-
-blockquote {
-	margin: 0.5em 0 1em;
-	padding-left: 0.5em;
-	padding-right: 1em;
-	border-left: 4px solid gainsboro;
-	font-style: italic;
-}
-
-ul,
-ol {
-	margin: 0;
-	margin-left: 1em;
-	padding: 0 1.5em 0.5em;
-}
-
-pre {
-	white-space: pre-wrap;
-}
-
-h1 code,
-h2 code,
-h3 code,
-h4 code,
-h5 code,
-h6 code,
-p code,
-li code,
-pre code {
-	background-color: #f8f8f8;
-	padding: 0.1em 0.375em;
-	border: 1px solid #f8f8f8;
-	border-radius: 0.25em;
-	font-family: monospace;
-	font-size: 1.2em;
-}
-
-pre code {
-	display: block;
-	padding: 0.5em;
-}
-
-.page-break {
-	page-break-after: always;
-}
-
-img {
-	max-width: 100%;
-	margin: 1em 0;
-}
-
-table {
-	border-spacing: 0;
-	border-collapse: collapse;
-	display: block;
-	margin: 0 0 1em;
-	width: 100%;
-	overflow: auto;
-}
-
-table th,
-table td {
-	padding: 0.5em 1em;
-	border: 1px solid gainsboro;
-}
-
-table th {
-	font-weight: 600;
-}
-
-table tr {
-	background-color: white;
-	border-top: 1px solid gainsboro;
-}
-
-table tr:nth-child(2n) {
-	background-color: whitesmoke;
-}`
-    writeFileSync('./markdown.css', css);
 
     // Configure common settings with explicit executable path options
     const commonConfig = {
       launch_options: { 
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
         headless: true,
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // Use environment variable if available
+        executablePath: process.env.CHROME_BIN, // Use environment variable if available
       },
       marked_extensions: [{ renderer }],
       script: [
