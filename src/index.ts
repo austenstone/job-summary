@@ -163,6 +163,7 @@ const run = async (): Promise<void> => {
     }
 
     if (input.createHtml || input.createPdf) {
+      info(`Installing Puppeteer browsers...`);
       try {
         execSync(`npx puppeteer browsers install chrome`)
       } catch (err) {
