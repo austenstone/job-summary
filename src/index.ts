@@ -128,6 +128,15 @@ const run = async (): Promise<void> => {
       },
     };
 
+    // print current working directory and files in it
+    debug(`Current working directory: ${process.cwd()}`);
+    try {
+      const files = readdirSync(process.cwd());
+      debug(`Files in current directory: ${files}`);
+    } catch (err) {
+      error(`Failed to read current directory: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
     // Install Chrome if needed for PDF/HTML generation
     if (input.createHtml || input.createPdf) {
       info('Configuring Chrome for PDF/HTML generation...');
