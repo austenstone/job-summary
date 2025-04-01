@@ -134,10 +134,6 @@ const run = async (): Promise<void> => {
     const srcFiles = readdirSync(path.join(__dirname));
     debug(`Files in src directory(${path.join(__dirname)}): ${srcFiles}`);
 
-    const specificFiles = readdirSync(`/home/runner/work/_actions/austenstone/job-summary/src`);
-    debug(`Files in specific directory: ${specificFiles}`);
-    // print files in this directory /home/runner/work/_actions/austenstone/job-summary/node_modules
-
     const css = ``;
     writeFileSync(path.join(__dirname, '..', 'markdown.css'), css);
 
