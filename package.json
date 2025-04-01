@@ -6,8 +6,7 @@
     "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "dev": "ts-node-dev --respawn src/index.ts",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "dev": "ts-node-dev --respawn src/index.ts"
   },
   "keywords": [
     "actions",

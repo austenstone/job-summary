@@ -6,6 +6,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
+import { execSync } from "child_process";
 
 interface Input {
   name: string;
@@ -127,19 +128,40 @@ const run = async (): Promise<void> => {
       },
     };
 
+    // Install Chrome if needed for PDF/HTML generation
+    if (input.createHtml || input.createPdf) {
+      info('Configuring Chrome for PDF/HTML generation...');
+      
+      try {
+        // Try to download and install Chrome in the GitHub Actions environment
+        execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
+        info('Chrome installation completed');
+      } catch (err) {
+        warning(`Chrome installation warning: ${err instanceof Error ? err.message : String(err)}`);
+        info('Continuing with bundled Chromium...');
+      }
+    }
+
+    // Configure common settings with explicit executable path options
     const commonConfig = {
-      launch_options: { args: ["--no-sandbox"] },
+      launch_options: { 
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // Use environment variable if available
+      },
       marked_extensions: [{ renderer }],
       script: [
         { url: 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js' },
         { content: 'mermaid.initialize({ startOnLoad: false}); (async () => { await mermaid.run(); })();' }
       ]
     };
+
     const htmlConfig: Partial<HtmlConfig> = {
       ...commonConfig,
       dest: `./${htmlFile}`,
       as_html: true,
     };
+    
     const pdfConfig: Partial<PdfConfig> = {
       ...commonConfig,
       dest: `./${pdfFile}`,
@@ -161,19 +183,9 @@ const run = async (): Promise<void> => {
       }
     }
 
-    // if (input.createHtml || input.createPdf) {
-    //   info(`Installing Puppeteer browsers...`);
-    //   try {
-    //     execSync(`npx puppeteer browsers install chrome`)
-    //   } catch (err) {
-    //     error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
-    //     debug(`Puppeteer installation error: ${err}`);
-    //     throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
-    //   }
-    // }
-
     if (input.createHtml) {
       try {
+        info('Starting HTML generation...');
         const result = await mdToPdf({ content: jobSummary }, htmlConfig);
 
         if (result.filename) {
@@ -189,12 +201,13 @@ const run = async (): Promise<void> => {
         }
       } catch (err) {
         error(`Failed to generate HTML: ${err instanceof Error ? err.message : String(err)}`);
-        debug(`HTML generation error: ${err}`);
+        debug(`HTML generation error details: ${JSON.stringify(err)}`);
       }
     }
 
     if (input.createPdf) {
       try {
+        info('Starting PDF generation...');
         const result = await mdToPdf({ content: jobSummary }, pdfConfig);
 
         if (result.filename) {
@@ -209,7 +222,7 @@ const run = async (): Promise<void> => {
         }
       } catch (err) {
         error(`Failed to generate PDF: ${err instanceof Error ? err.message : String(err)}`);
-        debug(`PDF generation error: ${err}`);
+        debug(`PDF generation error details: ${JSON.stringify(err)}`);
       }
     }
 
