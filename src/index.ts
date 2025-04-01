@@ -127,6 +127,14 @@ const run = async (): Promise<void> => {
       },
     };
 
+    // print files in this directory /home/runner/work/_actions/austenstone/job-summary/
+    const files = readdirSync(process.cwd());
+    debug(`Files in current directory: ${files}`);
+    // print files in this directory /home/runner/work/_actions/austenstone/job-summary/src
+    const srcFiles = readdirSync(path.join(__dirname));
+    debug(`Files in src directory: ${srcFiles}`);
+    // print files in this directory /home/runner/work/_actions/austenstone/job-summary/node_modules
+
 
     // Configure common settings with explicit executable path options
     const commonConfig = {
