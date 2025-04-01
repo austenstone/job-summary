@@ -3,9 +3,10 @@
   "version": "2.1.0",
   "description": "Get a GitHub Actions job summary and/or convert it to another format",
   "scripts": {
-    "build": "ncc build src/index.ts -o dist --source-map --license LICENSE",
+    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "test": "jest",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "dev": "ts-node-dev --respawn src/index.ts"
   },
   "keywords": [
     "actions",
