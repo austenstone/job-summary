@@ -168,6 +168,7 @@ const run = async (): Promise<void> => {
         execSync(`npx puppeteer browsers install chrome`)
       } catch (err) {
         error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
+        debug(`Puppeteer installation error: ${err}`);
         throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
@@ -189,6 +190,7 @@ const run = async (): Promise<void> => {
         }
       } catch (err) {
         error(`Failed to generate HTML: ${err instanceof Error ? err.message : String(err)}`);
+        debug(`HTML generation error: ${err}`);
       }
     }
 
@@ -208,6 +210,7 @@ const run = async (): Promise<void> => {
         }
       } catch (err) {
         error(`Failed to generate PDF: ${err instanceof Error ? err.message : String(err)}`);
+        debug(`PDF generation error: ${err}`);
       }
     }
 
