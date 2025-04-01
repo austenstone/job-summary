@@ -7,7 +7,7 @@ import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
 import { execSync } from "child_process";
-import 'md-to-pdf/dist/md'
+
 interface Input {
   name: string;
   createPdf: boolean;
