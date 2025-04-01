@@ -6,7 +6,6 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
-import { execSync } from "child_process";
 
 interface Input {
   name: string;
