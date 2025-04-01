@@ -6,8 +6,6 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
-import 'md-to-pdf/markdown.css';
-import 'highlight.js/styles/github.css';
 
 interface Input {
   name: string;
@@ -135,11 +133,18 @@ const run = async (): Promise<void> => {
     // print files in this directory /home/runner/work/_actions/austenstone/job-summary/src
     const srcFiles = readdirSync(path.join(__dirname));
     debug(`Files in src directory(${path.join(__dirname)}): ${srcFiles}`);
+    // print files in this directory /home/runner/work/_actions/austenstone/job-summary/src
+    const srcFiles2 = readdirSync(path.join(__dirname, '..'));
+    debug(`Files in src2 directory(${path.join(__dirname, '..')}): ${srcFiles2}`);
 
     const cssPath = path.join(__dirname, '../../', 'markdown.css');
     debug(`CSS file path: ${cssPath}`);
     const css = ``;
     writeFileSync(cssPath, css);
+
+    const cssPathGitHub = path.join(__dirname, '../styles/', 'github.css');
+    debug(`CSS cssPathGitHub path: ${cssPathGitHub}`);
+    writeFileSync(cssPathGitHub, css);
 
     // Configure common settings with explicit executable path options
     const commonConfig = {
