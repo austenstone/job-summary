@@ -165,7 +165,6 @@ const run = async (): Promise<void> => {
     if (input.createHtml || input.createPdf) {
       try {
         execSync(`npx puppeteer browsers install chrome`)
-        info('Puppeteer browsers installed successfully.');
       } catch (err) {
         error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
         throw new Error(`Failed to install Puppeteer browsers: ${err instanceof Error ? err.message : String(err)}`);
