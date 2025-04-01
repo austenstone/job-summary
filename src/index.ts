@@ -134,8 +134,10 @@ const run = async (): Promise<void> => {
     const srcFiles = readdirSync(path.join(__dirname));
     debug(`Files in src directory(${path.join(__dirname)}): ${srcFiles}`);
 
+    const cssPath = path.join(__dirname, '../../', 'markdown.css');
+    debug(`CSS file path: ${cssPath}`);
     const css = ``;
-    writeFileSync(path.join(__dirname, '..', 'markdown.css'), css);
+    writeFileSync(cssPath, css);
 
     // Configure common settings with explicit executable path options
     const commonConfig = {
