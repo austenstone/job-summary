@@ -6,6 +6,8 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { debug } from "console";
 import { mdToPdf } from 'md-to-pdf';
 import { HtmlConfig, PdfConfig } from "md-to-pdf/dist/lib/config";
+import 'md-to-pdf/markdown.css';
+import 'highlight.js/styles/github.css';
 
 interface Input {
   name: string;
