@@ -1,5 +1,5 @@
 import { endGroup, getBooleanInput, getInput, info, warning, error, setOutput, startGroup } from "@actions/core";
-import { readFileSync, readdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { access, constants } from "fs/promises";
 import path from "path";
 import { DefaultArtifactClient } from "@actions/artifact";
@@ -144,6 +144,14 @@ const run = async (): Promise<void> => {
 
     const cssPathGitHub = path.join(__dirname, '../styles/', 'github.css');
     debug(`CSS cssPathGitHub path: ${cssPathGitHub}`);
+    const cssDir = path.dirname(cssPathGitHub);
+
+    // Ensure the directory exists before writing the file
+    if (!existsSync(cssDir)) {
+      mkdirSync(cssDir, { recursive: true });
+      debug(`Created directory: ${cssDir}`);
+    }
+
     writeFileSync(cssPathGitHub, css);
 
     // Configure common settings with explicit executable path options
