@@ -78,9 +78,6 @@ const run = async (): Promise<void> => {
   endGroup();
   setOutput('job-summary', jobSummary);
 
-  if (input.createMd) {
-    writeFileSync(`./${mdFile}`, jobSummary);
-  }
   
   const configFileName = '_config.js';
   // https://gist.github.com/danishcake/d045c867594d6be175cb394995c90e2c#file-readme-md
@@ -105,38 +102,43 @@ module.exports = {
         { content: 'mermaid.initialize({ startOnLoad: false}); (async () => { await mermaid.run(); })();' }
     ]
 };`;
+  const launchOptions = ' --launch-options \'{ "args": ["--no-sandbox"] }\'';
   execSync(`npm i -g md-to-pdf`);
   writeFileSync(configFileName, config);
-  execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile}`);
-  info('PDF generated successfully');
-  execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} --as-html`);
-  info('HTML generated successfully');
-  unlinkSync(configFileName);
 
-  setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
-
-  if (input.createPdfArtifact) {
-    const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-pdf' : 'pdf', [pdfFile], '.')
+  if (input.createMd) {
+    writeFileSync(`./${mdFile}`, jobSummary);
+    if (input.createMdArtifact) {
+      const artifact = new DefaultArtifactClient()
+      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-md' : 'md', [mdFile], '.')
+    }
+  }
+  
+  if (input.createHtml) {
+    execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} --as-html ${launchOptions}`);
+    info('HTML generated successfully');
+    setOutput('job-summary-html', readFileSync(htmlFile, 'utf8'));
+    if (input.createHtmlArtifact) {
+      const artifact = new DefaultArtifactClient()
+      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-html' : 'html', [htmlFile], '.')
+    }
   }
 
-  if (input.createMdArtifact) {
-    const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-md' : 'md', [mdFile], '.')
+  if (input.createPdf) {
+    execSync(`md-to-pdf --config-file ./${configFileName} ./${mdFile} ${launchOptions}`);
+    info('PDF generated successfully');
+    setOutput('job-summary-pdf', readFileSync(pdfFile, 'utf8'));
+    if (input.createPdfArtifact) {
+      const artifact = new DefaultArtifactClient()
+      await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-pdf' : 'pdf', [pdfFile], '.')
+    }
   }
-
-  if (input.createHtmlArtifact) {
-    const artifact = new DefaultArtifactClient()
-    await artifact.uploadArtifact(input.artifactName ? input.artifactName + '-html' : 'html', [htmlFile], '.')
-  }
-
-  if (!input.createMd) unlinkSync(pdfFile);
-  if (!input.createPdf) unlinkSync(pdfFile);
-  if (!input.createHtml) unlinkSync(htmlFile);
 
   setOutput('pdf-file', path.resolve(pdfFile));
   setOutput('md-file', path.resolve(mdFile));
   setOutput('html-file', path.resolve(htmlFile));
+
+  unlinkSync(configFileName);
 };
 
 run();
