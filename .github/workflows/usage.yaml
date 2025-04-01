@@ -28,7 +28,7 @@ jobs:
           name: job-summary
           create-pdf-artifact: false
           create-md-artifact: false
-      - run: echo "${{ toJson(steps.usage.outputs) }}"
+      - run: echo "${{ steps.usage.outputs }}"
       - run: echo "${{ steps.usage.outputs.job-summary }}"
       - run: cat "${{ steps.usage.outputs.md-file }}"
       - run: cat "${{ steps.usage.outputs.pdf-file }}"
