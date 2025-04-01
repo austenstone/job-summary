@@ -136,6 +136,10 @@ const run = async (): Promise<void> => {
     } catch (err) {
       error(`Failed to read current directory: ${err instanceof Error ? err.message : String(err)}`);
     }
+    // env
+    debug(`Environment variables: ${JSON.stringify(process.env)}`);
+    // print the current node version
+    debug(`Node version: ${process.versions.node}`);
 
     // Install Chrome if needed for PDF/HTML generation
     if (input.createHtml || input.createPdf) {
