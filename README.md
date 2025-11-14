@@ -1,53 +1,110 @@
 # Job Summary Action
 
-Get and convert job summaries to Md, PDF, and HTML.
+A GitHub Action that retrieves job summaries and easily converts them to Markdown, PDF, and HTML formats.
 
-> [!TIP]
-> Try combining this with notification actions such as [send-email](https://github.com/marketplace/actions/send-email), [slack](https://github.com/marketplace/actions/slack-send), [teams](https://github.com/marketplace/actions/microsoft-teams-notification), [discord](https://github.com/marketplace/actions/discord-message-notify), etc.
+## 📋 Overview
 
-#### Usage
-Call the action and it will save the job summary as a PDF called job-summary.pdf
+This action allows you to:
+- Access the job summary content from your GitHub Actions workflow
+- Convert job summaries to PDF and/or HTML formats
+- Create artifacts for any generated files
+- Use the job summary content in subsequent workflow steps
 
-```yml
-      - uses: austenstone/job-summary@v2.0
+## 🚀 Simple Usage
+
+```yaml
+- uses: austenstone/job-summary@v2.0
 ```
 
-#### Usage to get only markdown summary
+## ⚙️ Usage Examples
 
-```yml
-      - uses: austenstone/job-summary@v2.0
-        id: job-summary
-        with:
-          create-pdf: false
-      - run: echo "${{ steps.job-summary.outputs.job-summary }}"
+### Basic: Just Get the Job Summary
+
+```yaml
+- uses: austenstone/job-summary@v2.0
+  id: summary
+- run: echo "${{ steps.summary.outputs.job-summary }}"
 ```
 
-<!-- #### Just get the Job Summary from URL
-```yml
-      - uses: austenstone/job-id@v1
-        id: job-id
-      - run: curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://github.com/${{ github.repository }}/actions/runs/$GITHUB_RUN_ID/jobs/$GITHUB_JOB_ID/summary_raw
-        env:
-          GITHUB_JOB_ID: ${{ steps.job-id.outputs.job-id }}
-``` -->
+### Generate PDF and Create Artifact
+
+```yaml
+- uses: austenstone/job-summary@v2.0
+  with:
+    create-pdf: true
+    create-pdf-artifact: true
+    name: build-report
+```
+
+### Generate All Formats with Custom Artifact Names
+
+```yaml
+- uses: austenstone/job-summary@v2.0
+  with:
+    create-md: true
+    create-md-artifact: true
+    create-pdf: true
+    create-pdf-artifact: true
+    create-html: true
+    create-html-artifact: true
+    artifact-name: workflow-report
+```
+
+### Generate HTML and Use in Email Notification
+
+```yaml
+- uses: austenstone/job-summary@v2.0
+  id: summary
+  with:
+    create-html: true
+
+- name: Send email with report
+  uses: dawidd6/action-send-mail@v3
+  with:
+    server_address: smtp.gmail.com
+    server_port: 465
+    username: ${{ secrets.EMAIL_USERNAME }}
+    password: ${{ secrets.EMAIL_PASSWORD }}
+    subject: Workflow Report
+    body: ${{ steps.summary.outputs.job-summary-html }}
+    html_body: ${{ steps.summary.outputs.job-summary-html }}
+```
 
 ## ➡️ Inputs
-Various inputs are defined in [`action.yml`](action.yml):
 
 | Name | Description | Default | Required |
-| --- | - | - | - |
-| name | The name of the Md and PDF file. | README | false |
-| create-pdf | Whether to create a PDF file. | true | false |
-| create-pdf-artifact | If the PDF will be saved as an artifact. | true | false |
-| create-md | Whether to create a markdown file. | true | false |
-| create-md-artifact | If the markdown will be saved as an artifact. | true | false |
+| --- | --- | --- | --- |
+| `name` | The name of the generated files | `job-summary` | No |
+| `create-md` | Whether to create a markdown file | `true` | No |
+| `create-md-artifact` | Create an artifact with the markdown file | `false` | No |
+| `create-pdf` | Whether to create a PDF file | `false` | No |
+| `create-pdf-artifact` | Create an artifact with the PDF file | `false` | No |
+| `create-html` | Whether to create an HTML file | `false` | No |
+| `create-html-artifact` | Create an artifact with the HTML file | `false` | No |
+| `artifact-name` | Custom name prefix for artifacts | | No |
 
 ## ⬅️ Outputs
-| Name | Description |
-| --- | - |
-| job-summary | The full job summary as markdown. |
-| pdf-file | The path to the PDF file. |
-| md-file | The path to the markdown file. |
 
-## Further help
-To get more help on the Actions see [documentation](https://docs.github.com/en/actions).
+| Name | Description |
+| --- | --- |
+| `job-summary` | The raw job summary content |
+| `job-summary-html` | The job summary as HTML |
+| `pdf-file` | The path to the generated PDF file |
+| `md-file` | The path to the generated Markdown file |
+| `html-file` | The path to the generated HTML file |
+
+## 💡 Tips
+
+- Combine with notification actions to share your workflow results:
+  - [Send Email Action](https://github.com/marketplace/actions/send-email)
+  - [Slack Notification Action](https://github.com/marketplace/actions/slack-send)
+  - [Microsoft Teams Notification](https://github.com/marketplace/actions/microsoft-teams-notification)
+  - [Discord Message Notify](https://github.com/marketplace/actions/discord-message-notify)
+
+- Use job summaries to document build status, test results, or deployment information
+- PDF artifacts are useful for permanent records of workflow runs
+- HTML output can be integrated with other reporting systems
+
+## 📚 Further Information
+
+For more help with GitHub Actions, see the [official documentation](https://docs.github.com/en/actions).

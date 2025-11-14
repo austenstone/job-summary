@@ -10,14 +10,6 @@ inputs:
     description: The name of the markdown and PDF file
     default: job-summary
     required: false
-  create-pdf:
-    description: Whether to create a PDF file
-    default: true
-    required: false
-  create-pdf-artifact:
-    description: Whether to create an artifact with the PDF file
-    default: true
-    required: false
   create-md:
     description: Whether to create a markdown file
     default: true
@@ -26,9 +18,17 @@ inputs:
     description: Whether to create an artifact with the markdown file
     default: false
     required: false
+  create-pdf:
+    description: Whether to create a PDF file
+    default: false
+    required: false
+  create-pdf-artifact:
+    description: Whether to create an artifact with the PDF file
+    default: false
+    required: false
   create-html:
     description: Whether to create an HTML file
-    default: true
+    default: false
     required: false
   create-html-artifact:
     description: Whether to create an artifact with the HTML file
@@ -47,7 +47,7 @@ outputs:
   pdf-file:
     description: The path to the PDF file
   md-file:
-    description: The path to the markdown file
+    description: The path to the Markdown file
   html-file:
     description: The path to the HTML file
 
