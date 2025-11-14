@@ -29,11 +29,12 @@ jobs:
         id: usage
         with:
           name: job-summary-${{ matrix.os }}
-          create-md-artifact: true
-          create-pdf-artifact: true
-          create-html-artifact: true
+      - name: Verify job summary output exists
+        run: |
+          if [ -z "${{ steps.usage.outputs.job-summary }}" ]; then
+            echo "❌ FAILED: job-summary output is empty or null"
+            exit 1
+          fi
+          echo "✅ PASSED: job-summary output exists"
+          echo "${{ steps.usage.outputs.job-summary }}"
       - run: echo '${{ toJson(steps.usage.outputs) }}'
-      - run: echo "${{ steps.usage.outputs.job-summary }}"
-      - run: cat "${{ steps.usage.outputs.md-file }}"
-      - run: cat "${{ steps.usage.outputs.pdf-file }}"
-      - run: cat "${{ steps.usage.outputs.html-file }}"

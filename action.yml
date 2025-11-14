@@ -12,7 +12,7 @@ inputs:
     required: false
   create-md:
     description: Whether to create a markdown file
-    default: true
+    default: false
     required: false
   create-md-artifact:
     description: Whether to create an artifact with the markdown file
