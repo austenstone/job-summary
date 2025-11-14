@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "description": "Get a GitHub Actions job summary and/or convert it to another format",
   "scripts": {
-    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "build": "ncc build src/index.ts -o dist",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "dev": "ts-node-dev --respawn src/index.ts"
@@ -25,8 +25,7 @@
     "@actions/artifact": "^4.0.0",
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
-    "md-to-pdf": "^5.2.4",
-    "puppeteer": "^24.30.0"
+    "md-to-pdf": "^5.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

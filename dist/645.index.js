@@ -9,6 +9,8 @@ var once = __webpack_require__(55560);
 
 var noop = function() {};
 
+var qnt = global.Bare ? queueMicrotask : process.nextTick.bind(process);
+
 var isRequest = function(stream) {
 	return stream.setHeader && typeof stream.abort === 'function';
 };
@@ -52,7 +54,7 @@ var eos = function(stream, opts, callback) {
 	};
 
 	var onclose = function() {
-		process.nextTick(onclosenexttick);
+		qnt(onclosenexttick);
 	};
 
 	var onclosenexttick = function() {
@@ -115,7 +117,7 @@ try {
 } catch (e) {}
 
 var noop = function () {}
-var ancient = /^v?\.0/.test(process.version)
+var ancient = typeof process === 'undefined' ? false : /^v?\.0/.test(process.version)
 
 var isFn = function (fn) {
   return typeof fn === 'function'
@@ -204,7 +206,7 @@ const pump = __webpack_require__(87898)
 const fs = __webpack_require__(79896)
 const path = __webpack_require__(16928)
 
-const win32 = (global.Bare?.platform || process.platform) === 'win32'
+const win32 = (global.Bare ? global.Bare.platform : process.platform) === 'win32'
 
 exports.pack = function pack (cwd, opts) {
   if (!cwd) cwd = '.'
@@ -310,11 +312,11 @@ function head (list) {
 }
 
 function processGetuid () {
-  return process.getuid ? process.getuid() : -1
+  return (!global.Bare && process.getuid) ? process.getuid() : -1
 }
 
 function processUmask () {
-  return process.umask ? process.umask() : 0
+  return (!global.Bare && process.umask) ? process.umask() : 0
 }
 
 exports.extract = function extract (cwd, opts) {
@@ -332,6 +334,7 @@ exports.extract = function extract (cwd, opts) {
   const now = new Date()
   const umask = typeof opts.umask === 'number' ? ~opts.umask : ~processUmask()
   const strict = opts.strict !== false
+  const validateSymLinks = opts.validateSymlinks !== false
 
   let map = opts.map || noop
   let dmode = typeof opts.dmode === 'number' ? opts.dmode : 0
@@ -365,22 +368,22 @@ exports.extract = function extract (cwd, opts) {
       return next()
     }
 
-    if (header.type === 'directory') {
-      stack.push([name, header.mtime])
-      return mkdirfix(name, {
-        fs: xfs,
-        own,
-        uid: header.uid,
-        gid: header.gid,
-        mode: header.mode
-      }, stat)
-    }
-
-    const dir = path.dirname(name)
+    const dir = path.join(name, '.') === path.join(cwd, '.') ? cwd : path.dirname(name)
 
     validate(xfs, dir, path.join(cwd, '.'), function (err, valid) {
       if (err) return next(err)
       if (!valid) return next(new Error(dir + ' is not a valid path'))
+
+      if (header.type === 'directory') {
+        stack.push([name, header.mtime])
+        return mkdirfix(name, {
+          fs: xfs,
+          own,
+          uid: header.uid,
+          gid: header.gid,
+          mode: header.mode
+        }, stat)
+      }
 
       mkdirfix(dir, {
         fs: xfs,
@@ -420,7 +423,7 @@ exports.extract = function extract (cwd, opts) {
       if (win32) return next() // skip symlinks on win for now before it can be tested
       xfs.unlink(name, function () {
         const dst = path.resolve(path.dirname(name), header.linkname)
-        if (!inCwd(dst)) return next(new Error(name + ' is not a valid symlink'))
+        if (!inCwd(dst) && validateSymLinks) return next(new Error(name + ' is not a valid symlink'))
 
         xfs.symlink(header.linkname, name, stat)
       })
@@ -429,21 +432,25 @@ exports.extract = function extract (cwd, opts) {
     function onlink () {
       if (win32) return next() // skip links on win for now before it can be tested
       xfs.unlink(name, function () {
-        const dst = path.join(cwd, path.join('/', header.linkname))
+        const link = path.join(cwd, path.join('/', header.linkname))
 
-        xfs.link(dst, name, function (err) {
-          if (err && err.code === 'EPERM' && opts.hardlinkAsFilesFallback) {
-            stream = xfs.createReadStream(dst)
-            return onfile()
-          }
+        fs.realpath(link, function (err, dst) {
+          if (err || !inCwd(dst)) return next(new Error(name + ' is not a valid hardlink'))
 
-          stat(err)
+          xfs.link(dst, name, function (err) {
+            if (err && err.code === 'EPERM' && opts.hardlinkAsFilesFallback) {
+              stream = xfs.createReadStream(dst)
+              return onfile()
+            }
+
+            stat(err)
+          })
         })
       })
     }
 
     function inCwd (dst) {
-      return dst.startsWith(cwd)
+      return dst === cwd || dst.startsWith(cwd + path.sep)
     }
 
     function onfile () {
@@ -518,10 +525,11 @@ exports.extract = function extract (cwd, opts) {
 
 function validate (fs, name, root, cb) {
   if (name === root) return cb(null, true)
+
   fs.lstat(name, function (err, st) {
-    if (err && err.code === 'ENOENT') return validate(fs, path.join(name, '..'), root, cb)
-    else if (err) return cb(err)
-    cb(null, st.isDirectory())
+    if (err && err.code !== 'ENOENT' && err.code !== 'EPERM') return cb(err)
+    if (err || st.isDirectory()) return validate(fs, path.join(name, '..'), root, cb)
+    cb(null, false)
   })
 }
 
@@ -584,4 +592,3 @@ function strip (map, level) {
 
 };
 ;
-//# sourceMappingURL=645.index.js.map
