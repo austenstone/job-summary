@@ -15,7 +15,7 @@ This action allows you to:
 ### Basic: Just Get the Job Summary
 
 ```yaml
-- uses: austenstone/job-summary@v2.0
+- uses: austenstone/job-summary@v3
   id: summary
 - run: echo "${{ steps.summary.outputs.job-summary }}"
 ```
@@ -23,7 +23,7 @@ This action allows you to:
 ### Generate PDF and Create Artifact
 
 ```yaml
-- uses: austenstone/job-summary@v2.0
+- uses: austenstone/job-summary@v3
   with:
     create-pdf: true
     create-pdf-artifact: true
@@ -33,7 +33,7 @@ This action allows you to:
 ### Generate All Formats with Custom Artifact Names
 
 ```yaml
-- uses: austenstone/job-summary@v2.0
+- uses: austenstone/job-summary@v3
   with:
     create-md: true
     create-md-artifact: true
@@ -47,13 +47,13 @@ This action allows you to:
 ### Generate HTML and Use in Email Notification
 
 ```yaml
-- uses: austenstone/job-summary@v2.0
+- uses: austenstone/job-summary@v3
   id: summary
   with:
     create-html: true
 
 - name: Send email with report
-  uses: dawidd6/action-send-mail@v3
+  uses: dawidd6/action-send-mail@v6
   with:
     server_address: smtp.gmail.com
     server_port: 465
