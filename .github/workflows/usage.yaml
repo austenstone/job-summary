@@ -28,7 +28,7 @@ jobs:
       - uses: austenstone/job-summary@main
         id: usage
         with:
-          name: job-summary
+          name: job-summary-${{ matrix.os }}
           create-md-artifact: true
           create-pdf-artifact: true
           create-html-artifact: true
