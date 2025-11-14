@@ -2,7 +2,7 @@
 
 A GitHub Action that retrieves job summaries and easily converts them to Markdown, PDF, and HTML formats.
 
-## 📋 Overview
+## Overview
 
 This action allows you to:
 - Access the job summary content from your GitHub Actions workflow
@@ -10,13 +10,7 @@ This action allows you to:
 - Create artifacts for any generated files
 - Use the job summary content in subsequent workflow steps
 
-## 🚀 Simple Usage
-
-```yaml
-- uses: austenstone/job-summary@v2.0
-```
-
-## ⚙️ Usage Examples
+## Usage
 
 ### Basic: Just Get the Job Summary
 
