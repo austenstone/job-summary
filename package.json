@@ -25,7 +25,7 @@
     "@actions/artifact": "^4.0.0",
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
-    "md-to-pdf": "^5.2.4"
+    "md-to-pdf": "^5.2.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
